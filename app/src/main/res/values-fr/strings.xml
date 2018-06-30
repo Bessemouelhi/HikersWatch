@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hiker\'s Watch</string>
+    <string name="acc">"Précision : "</string>
+    <string name="address">"Adresse : "</string>
+    <string name="altitude">"Altitude : "</string>
+    <string name="speed">"Vitesse : "</string>
+    <string name="lat">"Latitude : "</string>
+    <string name="lng">"Longitude : "</string>
+</resources>

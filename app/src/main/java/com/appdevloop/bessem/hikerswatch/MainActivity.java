@@ -1,6 +1,7 @@
 package com.appdevloop.bessem.hikerswatch;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,11 +19,18 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        this.configureToolbar();
+
         //https://source.unsplash.com/category/nature/1920x1080
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -100,6 +110,10 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        updateRequest();
+    }
+
+    private void updateRequest() {
         if (Build.VERSION.SDK_INT < 23) {
             startListening();
         } else {
@@ -112,6 +126,40 @@ public class MainActivity extends AppCompatActivity {
                     updateLocationInfo(location);
                 }
             }
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_refresh:
+                updateRequest();
+
+                /*// define the animation for rotation
+                Animation animation = new RotateAnimation(0.0f, 360.0f,
+                                                          Animation.RELATIVE_TO_SELF, 0.5f,
+                                                          Animation.RELATIVE_TO_SELF, 0.5f);
+                animation.setDuration(1000);
+                //animRotate = AnimationUtils.loadAnimation(this, R.anim.rotation);
+
+                animation.setRepeatCount(3);
+
+                ImageView imageView = new ImageView(this);
+                imageView.setImageDrawable(item.getIcon());
+
+                imageView.startAnimation(animation);
+                item.setActionView(imageView);*/
+
+                Toast.makeText(this, "On Update...", Toast.LENGTH_LONG).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -160,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
             List<Address> listAddresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
             if (listAddresses != null && listAddresses.size() > 0 ) {
                 Log.i("PlaceInfo", listAddresses.get(0).toString());
-                address = "Address: \n";
+                address = "Address: ";
 
                 if (listAddresses.get(0).getSubThoroughfare() != null) {
                     address += listAddresses.get(0).getSubThoroughfare() + " ";
@@ -171,11 +219,11 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (listAddresses.get(0).getLocality() != null) {
-                    address += listAddresses.get(0).getLocality() + "\n";
+                    address += listAddresses.get(0).getLocality() + " ";
                 }
 
                 if (listAddresses.get(0).getPostalCode() != null) {
-                    address += listAddresses.get(0).getPostalCode() + "\n";
+                    address += listAddresses.get(0).getPostalCode() + " ";
                 }
 
                 if (listAddresses.get(0).getCountryName() != null) {
@@ -190,6 +238,32 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+    }
+
+    private void configureToolbar(){
+        //Get the toolbar (Serialise)
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //Set the toolbar
+        setSupportActionBar(toolbar);
+
+        toolbar.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                                       int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                View item = toolbar.findViewById(R.id.action_refresh);
+                if (item != null) {
+                    toolbar.removeOnLayoutChangeListener(this);
+                    item.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ObjectAnimator animator = ObjectAnimator
+                                    .ofFloat(v, "rotation", v.getRotation() + 1080);
+                            animator.setDuration(3000).start();
+                        }
+                    });
+                }
+            }
+        });
     }
 
     /*@Override

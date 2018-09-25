@@ -7,4 +7,7 @@
     <string name="speed">"Vitesse : "</string>
     <string name="lat">"Latitude : "</string>
     <string name="lng">"Longitude : "</string>
+    <string name="address_nrecherche">Adresse : Recherche</string>
+    <string name="accuracy_0m">"Précision : "</string>
+    <string name="speed_0m_s">Vitesse : 0m/s</string>
 </resources>

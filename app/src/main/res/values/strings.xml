@@ -6,4 +6,10 @@
     <string name="lng">Longitude:</string>
     <string name="speed">Speed:</string>
     <string name="acc">Accuracy:</string>
+    <string name="address_nrecherche">Address : </string>
+    <string name="accuracy_0m">Accuracy : 0m</string>
+    <string name="speed_0m_s">Speed : 0m/s</string>
+    <string name="longitude_0_0">Longitude : 0.0</string>
+    <string name="latitude_0_0">Latitude : 0.0</string>
+    <string name="altitude_0m">Altitude : 0m</string>
 </resources>

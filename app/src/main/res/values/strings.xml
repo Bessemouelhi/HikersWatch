@@ -12,4 +12,5 @@
     <string name="longitude_0_0">Longitude : 0.0</string>
     <string name="latitude_0_0">Latitude : 0.0</string>
     <string name="altitude_0m">Altitude : 0m</string>
+    <string name="no_location">GPS not enabled</string>
 </resources>

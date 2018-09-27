@@ -301,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (!gps_enabled && !network_enabled) {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setMessage("Location inormation not enabled");
+            dialog.setMessage(R.string.no_location);
             dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface paramDialogInterface, int paramInt) {

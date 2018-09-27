@@ -10,4 +10,5 @@
     <string name="address_nrecherche">Adresse : Recherche</string>
     <string name="accuracy_0m">"Précision : "</string>
     <string name="speed_0m_s">Vitesse : 0m/s</string>
+    <string name="no_location">GPS non activé</string>
 </resources>

@@ -2,6 +2,7 @@ package com.appdevloop.bessem.hikerswatch;
 
 import android.Manifest;
 import android.animation.ObjectAnimator;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -24,6 +26,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -60,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     LocationManager locationManager;
     LocationListener locationListener;
     String provider;
+    private Toolbar toolbar;
 
     TextView tv_alt;
     TextView tv_lat;
@@ -68,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
     TextView tv_accuracy;
     TextView tv_bearing;
     TextView tv_address;
+    private boolean gps_enabled;
+    private boolean network_enabled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,24 +145,18 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_refresh:
-                updateRequest();
+                checkInternet();
+                checkGPS();
+                if (isGpsEnabled(this)) {
+                    updateRequest();
+                    View refresh = toolbar.findViewById(R.id.action_refresh);
 
-                /*// define the animation for rotation
-                Animation animation = new RotateAnimation(0.0f, 360.0f,
-                                                          Animation.RELATIVE_TO_SELF, 0.5f,
-                                                          Animation.RELATIVE_TO_SELF, 0.5f);
-                animation.setDuration(1000);
-                //animRotate = AnimationUtils.loadAnimation(this, R.anim.rotation);
+                    ObjectAnimator animator = ObjectAnimator
+                            .ofFloat(refresh, "rotation", refresh.getRotation() + 1080);
+                    animator.setDuration(3000).start();
+                }
 
-                animation.setRepeatCount(3);
-
-                ImageView imageView = new ImageView(this);
-                imageView.setImageDrawable(item.getIcon());
-
-                imageView.startAnimation(animation);
-                item.setActionView(imageView);*/
-
-                Toast.makeText(this, "On Update...", Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, "On Update...", Toast.LENGTH_LONG).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -172,6 +172,12 @@ public class MainActivity extends AppCompatActivity {
 
         return activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
+    }
+
+    private void checkInternet() {
+        if (!isConnecting(this)) {
+            Toast.makeText(this, "No Internet Connection", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -206,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             String address = "Could not find address";
             List<Address> listAddresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-            if (listAddresses != null && listAddresses.size() > 0 ) {
+            if (listAddresses != null && listAddresses.size() > 0) {
                 Log.i("PlaceInfo", listAddresses.get(0).toString());
                 address = "Address: ";
 
@@ -240,30 +246,72 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void configureToolbar(){
-        //Get the toolbar (Serialise)
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //Set the toolbar
-        setSupportActionBar(toolbar);
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    @SuppressWarnings("deprecation")
+    public static boolean isGpsEnabled(Context context) {
 
-        toolbar.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                                       int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                View item = toolbar.findViewById(R.id.action_refresh);
-                if (item != null) {
-                    toolbar.removeOnLayoutChangeListener(this);
-                    item.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ObjectAnimator animator = ObjectAnimator
-                                    .ofFloat(v, "rotation", v.getRotation() + 1080);
-                            animator.setDuration(3000).start();
-                        }
-                    });
-                }
+        if (PackageUtil.checkPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            String providers = Settings.Secure.getString(context.getContentResolver(),
+                                                         Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            if (TextUtils.isEmpty(providers)) {
+                return false;
             }
-        });
+            return providers.contains(LocationManager.GPS_PROVIDER);
+        } else {
+            final int locationMode;
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(),
+                                                      Settings.Secure.LOCATION_MODE);
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+            switch (locationMode) {
+
+                case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
+                case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
+                    return true;
+                case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
+                case Settings.Secure.LOCATION_MODE_OFF:
+                default:
+                    return false;
+            }
+        }
+    }
+
+    private void configureToolbar() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+    }
+
+    private void checkGPS() {
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+        }
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+        }
+        if (!gps_enabled && !network_enabled) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage("Location inormation not enabled");
+            dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(myIntent);
+                }
+            });
+            dialog.setNegativeButton("Cancel", null);
+            dialog.show();
+        }
     }
 
     /*@Override

@@ -6,10 +6,8 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
-import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
@@ -17,35 +15,29 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.appdevloop.bessem.hikerswatch.api.RotationGestureDetector;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 import java.io.IOException;
 import java.util.List;
@@ -75,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean gps_enabled;
     private boolean network_enabled;
 
+    private RotationGestureDetector mRotationDetector;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +88,12 @@ public class MainActivity extends AppCompatActivity {
         tv_address = findViewById(R.id.tv_address);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        Location mockLocation = new Location(provider); // a string
+        mockLocation.setLatitude(-26.902038);  // double
+        mockLocation.setLongitude(-48.671337);
+        updateLocationInfo(mockLocation);
+
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -117,6 +117,14 @@ public class MainActivity extends AppCompatActivity {
         };
 
         updateRequest();
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainActivity.this, "OK", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void updateRequest() {

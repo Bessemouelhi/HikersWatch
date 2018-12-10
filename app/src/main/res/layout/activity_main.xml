@@ -128,6 +128,17 @@
                 android:textStyle="bold"/>
         </RelativeLayout>
 
+        <com.appdevloop.bessem.hikerswatch.api.MovableFloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:layout_marginBottom="20dp"
+            app:srcCompat="@drawable/ic_point_map"/>
+
     </RelativeLayout>
+
+
 
 </LinearLayout>

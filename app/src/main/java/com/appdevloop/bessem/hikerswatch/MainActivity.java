@@ -64,8 +64,11 @@ public class MainActivity extends AppCompatActivity {
     TextView tv_accuracy;
     TextView tv_bearing;
     TextView tv_address;
+
     private boolean gps_enabled;
     private boolean network_enabled;
+    private double latitude;
+    private double longitude;
 
     private RotationGestureDetector mRotationDetector;
 
@@ -89,10 +92,10 @@ public class MainActivity extends AppCompatActivity {
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        Location mockLocation = new Location(provider); // a string
+        /*Location mockLocation = new Location(provider); // a string
         mockLocation.setLatitude(-26.902038);  // double
         mockLocation.setLongitude(-48.671337);
-        updateLocationInfo(mockLocation);
+        updateLocationInfo(mockLocation);*/
 
         locationListener = new LocationListener() {
             @Override
@@ -122,7 +125,13 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "OK", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, latitude + " - " + longitude, Toast.LENGTH_SHORT).show();
+                if (latitude > 0 && longitude > 0) {
+                    Intent i = new Intent(MainActivity.this, MapsActivity.class);
+                    i.putExtra("latitude", latitude);
+                    i.putExtra("longitude", longitude);
+                    startActivity(i);
+                }
             }
         });
     }
@@ -209,6 +218,9 @@ public class MainActivity extends AppCompatActivity {
     public void updateLocationInfo(Location location) {
 
         Log.i("LocationInfo", location.toString());
+
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
 
         tv_lat.setText("Latitude: " + String.format("%.5f", location.getLatitude()));
         tv_lng.setText("Longitude: " + String.format("%.5f", location.getLongitude()));

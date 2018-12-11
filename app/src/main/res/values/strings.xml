@@ -14,4 +14,5 @@
     <string name="altitude_0m">Altitude : 0m</string>
     <string name="no_location">GPS not enabled</string>
     <string name="title_activity_map_location">MapLocationActivity</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
